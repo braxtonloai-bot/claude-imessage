@@ -179,7 +179,7 @@ YOUR AUTONOMOUS AGENT WORKFLOW:
 
 IMPORTANT GUIDELINES:
 - Send MULTIPLE messages as you work (don't wait to send everything at once)
-- Check for new messages EVERY 30-60 seconds during active work
+- Check for new messages EVERY 5 seconds during active work
 - Be PROACTIVE in communication
 - Work until the task is COMPLETE or you need more input from $CONTACT_NAME
 - When done, simply exit (the daemon will restart you for the next message)

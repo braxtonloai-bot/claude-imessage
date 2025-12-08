@@ -13,6 +13,24 @@ This plugin adds iMessage capabilities to Claude Code, allowing you to:
 
 The daemon creates a continuous conversation thread with Claude Code over iMessage, making it accessible from iPhone, iPad, Mac, or Apple Watch.
 
+## Installation
+
+### Prerequisites
+
+- macOS with Messages app signed in to iMessage
+- Claude Code installed ([get Claude Code](https://code.claude.com))
+- Full Disk Access permission for Terminal (System Preferences > Security & Privacy > Privacy > Full Disk Access)
+
+### Install the Plugin
+
+```bash
+# In any Claude Code session
+/plugin marketplace add dvdsgl/claude-imessage
+/plugin install imessage@dvdsgl
+```
+
+That's it! The iMessage skill and daemon management commands are now available.
+
 ## Features
 
 ### iMessage Skill
@@ -38,24 +56,6 @@ The daemon monitors iMessages and automatically:
 5. Maintains conversation continuity across sessions
 
 The agent has access to all Claude Code capabilities including other skills, tools, and can perform complex multi-step tasks autonomously.
-
-## Installation
-
-### Prerequisites
-
-- macOS with Messages app signed in to iMessage
-- Claude Code installed ([get Claude Code](https://code.claude.com))
-- Full Disk Access permission for Terminal (System Preferences > Security & Privacy > Privacy > Full Disk Access)
-
-### Install the Plugin
-
-```bash
-# In any Claude Code session
-/plugin marketplace add dvdsgl/claude-imessage
-/plugin install imessage@dvdsgl
-```
-
-That's it! The iMessage skill and daemon management commands are now available.
 
 ## Quick Start
 
