@@ -1,6 +1,6 @@
-# Claude iMessage
+# Claude Code iMessageAgent
 
-Turn Claude Code into an autonomous iMessage assistant that monitors your messages and responds automatically using the full power of Claude Code.
+An iMessage assistant that monitors for messages and responds using the full power of Claude Code.
 
 ![Claude iMessage Demo](media/demo.jpg)
 
