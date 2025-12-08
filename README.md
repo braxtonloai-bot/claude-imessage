@@ -29,7 +29,7 @@ See [`skills/imessage/SKILL.md`](skills/imessage/SKILL.md) for complete document
 
 ### Auto-Reply Daemon
 
-The daemon script (`daemon/imessage-auto-reply-daemon.sh`) monitors iMessages and automatically:
+The daemon monitors iMessages and automatically:
 
 1. Detects new messages from a configured contact
 2. Starts an autonomous Claude Code agent session
@@ -47,9 +47,7 @@ The agent has access to all Claude Code capabilities including other skills, too
 - Claude Code installed ([get Claude Code](https://code.claude.com))
 - Full Disk Access permission for Terminal (System Preferences > Security & Privacy > Privacy > Full Disk Access)
 
-### Install as Claude Code Plugin
-
-1. **Install the plugin from GitHub:**
+### Install the Plugin
 
 ```bash
 # In any Claude Code session
@@ -57,43 +55,49 @@ The agent has access to all Claude Code capabilities including other skills, too
 /plugin install imessage@dvdsgl
 ```
 
-2. **Restart Claude Code** to load the plugin
-
-3. **Verify installation:**
-
-```bash
-# Check that the imessage skill is available
-claude -p "Use the imessage skill to list my recent conversations"
-```
-
-The iMessage skill is now available in all your Claude Code sessions!
-
-### Alternative: Manual Installation
-
-If you prefer to install manually or want to modify the code:
-
-1. **Clone the repository:**
-
-```bash
-git clone https://github.com/dvdsgl/claude-imessage.git ~/Developer/claude-imessage
-```
-
-2. **Add as a local skill** in your Claude Code project:
-
-```bash
-# In your project's .claude/settings.json, add:
-{
-  "skills": [
-    {
-      "path": "~/Developer/claude-imessage/skills/imessage"
-    }
-  ]
-}
-```
+That's it! The iMessage skill and daemon management commands are now available.
 
 ## Quick Start
 
-### Using the iMessage Skill
+### 1. Configure the Daemon
+
+Create a configuration file with your contact details:
+
+```bash
+# Create config file
+cat > ~/.claude-imessage.env << 'EOF'
+export IMESSAGE_CONTACT_PHONE="4155551234"      # Phone number (digits only)
+export IMESSAGE_CONTACT_NAME="John Doe"         # Display name
+export IMESSAGE_CONTACT_EMAIL="john@example.com"  # Optional: if using iMessage email
+EOF
+
+# Load the configuration
+source ~/.claude-imessage.env
+```
+
+### 2. Start the Daemon
+
+In any Claude Code session:
+
+```bash
+/imessage-daemon start
+```
+
+The daemon is now running and monitoring for messages from your configured contact!
+
+### 3. Send a Message
+
+Send an iMessage from your configured contact's phone, and watch Claude respond autonomously.
+
+### 4. Manage the Daemon
+
+```bash
+/imessage-daemon status  # Check if running and view logs
+/imessage-daemon stop    # Stop the daemon
+/imessage-daemon start   # Start the daemon
+```
+
+## Using the iMessage Skill
 
 Once installed, you can use iMessage tools in any Claude Code conversation:
 
@@ -102,68 +106,11 @@ Once installed, you can use iMessage tools in any Claude Code conversation:
 claude -p "Use the imessage skill to read my recent messages from 4155551234"
 
 # Send a message
-claude -p "Use the imessage skill to send a message to 4155551234 saying 'Hello from Claude!'"
+claude -p "Use the imessage skill to send a message to 4155551234 saying 'Hello!'"
 
 # Check for new messages
 claude -p "Use the imessage skill to check if I have any new messages"
 ```
-
-### Running the Auto-Reply Daemon
-
-The daemon monitors iMessages and creates autonomous agent sessions. This is perfect for having Claude as an always-available assistant via iMessage.
-
-#### 1. Configure the Daemon
-
-Create a `.env` file with your configuration:
-
-```bash
-# Copy the example
-cp ~/Developer/claude-imessage/examples/.env.example ~/.claude-imessage.env
-
-# Edit with your details
-nano ~/.claude-imessage.env
-```
-
-Required environment variables:
-
-```bash
-# Contact to monitor (required)
-IMESSAGE_CONTACT_PHONE="4155551234"  # Phone number without + or dashes
-IMESSAGE_CONTACT_NAME="John Doe"     # Display name
-
-# Optional settings
-IMESSAGE_CONTACT_EMAIL="john@example.com"  # If they use email for iMessage
-IMESSAGE_CHECK_INTERVAL="1"                 # Check every N seconds (default: 1)
-IMESSAGE_TMP_DIR="$HOME/tmp/imessage"      # Where to store logs and state
-```
-
-#### 2. Start the Daemon
-
-```bash
-# Load your configuration
-source ~/.claude-imessage.env
-
-# Start the daemon
-nohup ~/Developer/claude-imessage/daemon/imessage-auto-reply-daemon.sh > /dev/null 2>&1 &
-```
-
-#### 3. Monitor the Daemon
-
-```bash
-# Check if daemon is running
-ps aux | grep imessage-auto-reply-daemon
-
-# View logs
-tail -f ~/tmp/imessage/imessage-auto-reply.log
-tail -f ~/tmp/imessage/imessage-agent.log
-
-# Stop the daemon
-pkill -f imessage-auto-reply-daemon
-```
-
-#### 4. Send a Message
-
-Send an iMessage to the phone number configured in the daemon from your other phone, and watch Claude respond autonomously!
 
 ## How It Works
 
@@ -183,12 +130,12 @@ When the daemon receives a message, it:
 
 ### Conversation Continuity
 
-The daemon uses Claude Code's conversation resume feature to maintain a continuous thread:
+The daemon uses Claude Code's conversation resume feature:
 
 - First message starts a new conversation
 - Subsequent messages resume the same conversation ID
 - Full history is available across all agent sessions
-- Save the conversation ID to `~/tmp/imessage/imessage_claude_conversation_id.txt` to persist across daemon restarts
+- Conversation ID saved in `~/tmp/imessage/imessage_claude_conversation_id.txt`
 
 ### Example Interaction
 
@@ -202,14 +149,14 @@ Claude: "You have 3 events today:
 
 You: "Remind me to prepare slides before the product review"
 Claude: "I'll create a reminder..."
-Claude: "Done! I've added a reminder for 1:30pm to prepare slides for your product review."
+Claude: "Done! Added a reminder for 1:30pm to prepare slides."
 ```
 
 ## Configuration
 
 ### Environment Variables
 
-All configuration is via environment variables in your `.env` file:
+Configure the daemon via environment variables in `~/.claude-imessage.env`:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
@@ -217,19 +164,36 @@ All configuration is via environment variables in your `.env` file:
 | `IMESSAGE_CONTACT_NAME` | Yes | Display name of contact |
 | `IMESSAGE_CONTACT_EMAIL` | No | Email if they use iMessage email |
 | `IMESSAGE_CHECK_INTERVAL` | No | Check interval in seconds (default: 1) |
-| `IMESSAGE_TMP_DIR` | No | Directory for logs and state (default: ./tmp) |
+| `IMESSAGE_TMP_DIR` | No | Directory for logs (default: ~/tmp/imessage) |
+
+### Example Configuration
+
+```bash
+# ~/.claude-imessage.env
+export IMESSAGE_CONTACT_PHONE="4155551234"
+export IMESSAGE_CONTACT_NAME="Alice Smith"
+export IMESSAGE_CHECK_INTERVAL="1"
+export IMESSAGE_TMP_DIR="$HOME/tmp/imessage"
+```
+
+Load before starting the daemon:
+
+```bash
+source ~/.claude-imessage.env
+/imessage-daemon start
+```
 
 ### Customizing Agent Behavior
 
-The daemon script (`daemon/imessage-auto-reply-daemon.sh`) contains the agent prompt that defines Claude's behavior. You can customize:
+The daemon script contains the agent prompt that defines Claude's behavior. To customize:
 
-- Communication style and tone
-- Available skills and tools
-- Task handling approach
-- Progress update frequency
-- Error handling behavior
-
-Edit the `agent_prompt` variable in the daemon script to customize.
+1. Find the plugin installation directory (typically in Claude Code's plugin directory)
+2. Edit `skills/imessage/daemon/imessage-auto-reply-daemon.sh`
+3. Modify the `agent_prompt` variable to customize:
+   - Communication style and tone
+   - Available skills and tools
+   - Task handling approach
+   - Progress update frequency
 
 ## Architecture
 
@@ -238,22 +202,22 @@ Edit the `agent_prompt` variable in the daemon script to customize.
 ```
 claude-imessage/
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin metadata for Claude Code
+│   └── plugin.json          # Plugin metadata
+├── commands/
+│   └── imessage-daemon.md   # Daemon management command
 ├── skills/
 │   └── imessage/
 │       ├── SKILL.md         # Skill documentation
-│       ├── send-message.sh  # Send messages via AppleScript
+│       ├── daemon/
+│       │   ├── imessage-auto-reply-daemon.sh  # Auto-reply daemon
+│       │   └── README.md    # Daemon documentation
+│       ├── send-message.sh  # Send messages
 │       ├── send-to-chat.sh  # Send to group chats
-│       ├── read-messages-db.sh      # Read message history from DB
-│       ├── check-new-messages-db.sh # Check for new messages
-│       ├── list-conversations.sh    # List all conversations
-│       ├── send-file.sh     # Send file attachments
-│       └── get-message-attachments.sh  # Retrieve attachments
-├── daemon/
-│   ├── imessage-auto-reply-daemon.sh  # Auto-reply daemon
-│   └── README.md            # Daemon documentation
+│       ├── read-messages-db.sh      # Read history
+│       ├── check-new-messages-db.sh # Check new messages
+│       └── ... (other tools)
 ├── examples/
-│   └── .env.example         # Example configuration
+│   └── .env.example         # Configuration template
 └── README.md
 ```
 
@@ -265,13 +229,11 @@ The skill uses two approaches:
    - Fast and reliable
    - No permission issues
    - Access to full message history
-   - Extracts text from both incoming and outgoing messages
 
 2. **AppleScript** (sending): Uses Messages app automation
    - Send to contacts or phone numbers
-   - Send to group chats by chat identifier
+   - Send to group chats
    - Support for file attachments
-   - Works with both iMessage and SMS
 
 ## Troubleshooting
 
@@ -281,52 +243,72 @@ If you get permission errors:
 
 1. Grant Full Disk Access to Terminal:
    - System Preferences > Security & Privacy > Privacy > Full Disk Access
-   - Add Terminal.app (or your terminal emulator)
+   - Add Terminal.app
    - Restart your terminal
 
 2. Messages app permissions:
    - System Preferences > Security & Privacy > Privacy > Automation
    - Ensure Terminal can control Messages
 
-### Daemon Not Responding
+### Daemon Not Starting
 
-If the daemon isn't responding to messages:
+```bash
+# Check configuration
+source ~/.claude-imessage.env
+echo $IMESSAGE_CONTACT_PHONE
+echo $IMESSAGE_CONTACT_NAME
 
-1. Check if it's running: `ps aux | grep imessage-auto-reply-daemon`
-2. Check logs: `tail -f ~/tmp/imessage/imessage-auto-reply.log`
-3. Verify environment variables are set: `echo $IMESSAGE_CONTACT_PHONE`
-4. Test the skill manually: `./skills/imessage/check-new-messages-db.sh`
+# Check daemon status
+/imessage-daemon status
+
+# View logs
+tail -f ~/tmp/imessage/imessage-auto-reply.log
+```
 
 ### Messages Not Sending
 
-If Claude can't send messages:
-
 1. Verify Messages app is signed in to iMessage
-2. Test sending manually: `./skills/imessage/send-message.sh "YOUR_PHONE" "test"`
+2. Test manually: `claude -p "Use imessage skill to send test message to YOUR_PHONE"`
 3. Check AppleScript permissions (see Permission Issues above)
-4. Try using the phone number instead of contact name
+
+### Daemon Logs
+
+Check logs for detailed information:
+
+```bash
+# Daemon activity
+tail -f ~/tmp/imessage/imessage-auto-reply.log
+
+# Agent output
+tail -f ~/tmp/imessage/imessage-agent.log
+
+# Or use the status command
+/imessage-daemon status
+```
 
 ## Advanced Usage
 
 ### Multiple Contacts
 
-To monitor multiple contacts, run multiple daemon instances with different configurations:
+To monitor multiple contacts, configure and start separate daemon instances:
 
 ```bash
-# Terminal 1
+# Terminal 1 - Monitor Alice
 export IMESSAGE_CONTACT_PHONE="4155551234"
 export IMESSAGE_CONTACT_NAME="Alice"
-~/Developer/claude-imessage/daemon/imessage-auto-reply-daemon.sh
+export IMESSAGE_TMP_DIR="$HOME/tmp/imessage-alice"
+/imessage-daemon start
 
-# Terminal 2
+# Terminal 2 - Monitor Bob
 export IMESSAGE_CONTACT_PHONE="4155555678"
 export IMESSAGE_CONTACT_NAME="Bob"
-~/Developer/claude-imessage/daemon/imessage-auto-reply-daemon.sh
+export IMESSAGE_TMP_DIR="$HOME/tmp/imessage-bob"
+/imessage-daemon start
 ```
 
 ### Integrating with Other Skills
 
-The iMessage agent has access to all your Claude Code skills. You can:
+The iMessage agent has access to all your Claude Code skills:
 
 - Check calendars via iMessage
 - Create tasks and notes
@@ -339,30 +321,41 @@ Just make sure those skills are available in your Claude Code environment.
 
 ### Conversation Persistence
 
-To maintain conversation history across daemon restarts:
+The conversation ID is automatically saved and reused across daemon restarts in:
+```
+~/tmp/imessage/imessage_claude_conversation_id.txt
+```
 
-1. After the first message, check the logs for the conversation ID
-2. Save it to a file: `echo "conv_abc123" > ~/tmp/imessage/imessage_claude_conversation_id.txt`
-3. The daemon will automatically resume this conversation for all future messages
+This maintains full conversation history even if the daemon restarts.
 
 ## Security Considerations
 
-- The daemon has full access to your iMessage database and can read all messages
+- The daemon has full access to your iMessage database
 - Claude Code can send messages on your behalf
 - Environment variables may contain sensitive phone numbers
 - Logs may contain message content
-- Grant permissions carefully and only run the daemon in trusted environments
+- Only run the daemon in trusted environments
+- Be mindful of which contact you monitor
+
+## Manual Installation (Advanced)
+
+If you need to modify the code or prefer not to use the plugin system:
+
+```bash
+# Clone the repository
+git clone https://github.com/dvdsgl/claude-imessage.git ~/Developer/claude-imessage
+
+# Run daemon directly
+cd ~/Developer/claude-imessage
+source ~/.claude-imessage.env
+./skills/imessage/daemon/imessage-auto-reply-daemon.sh
+```
+
+See [`skills/imessage/daemon/README.md`](skills/imessage/daemon/README.md) for detailed manual setup instructions.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
-
-### Development Setup
-
-1. Fork and clone the repository
-2. Make changes to the skill or daemon
-3. Test locally using the manual installation method
-4. Submit a pull request
+Contributions are welcome! Please submit issues, feature requests, or pull requests on GitHub.
 
 ## License
 
