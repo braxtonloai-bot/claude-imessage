@@ -1,4 +1,4 @@
-# Claude Code iMessageAgent
+# Claude Code iMessage Assistant
 
 An iMessage assistant that monitors for messages and responds using the full power of Claude Code.
 
