@@ -286,48 +286,6 @@ tail -f ~/tmp/imessage/imessage-agent.log
 /imessage-daemon status
 ```
 
-## Advanced Usage
-
-### Multiple Contacts
-
-To monitor multiple contacts, configure and start separate daemon instances:
-
-```bash
-# Terminal 1 - Monitor Alice
-export IMESSAGE_CONTACT_PHONE="4155551234"
-export IMESSAGE_CONTACT_NAME="Alice"
-export IMESSAGE_TMP_DIR="$HOME/tmp/imessage-alice"
-/imessage-daemon start
-
-# Terminal 2 - Monitor Bob
-export IMESSAGE_CONTACT_PHONE="4155555678"
-export IMESSAGE_CONTACT_NAME="Bob"
-export IMESSAGE_TMP_DIR="$HOME/tmp/imessage-bob"
-/imessage-daemon start
-```
-
-### Integrating with Other Skills
-
-The iMessage agent has access to all your Claude Code skills:
-
-- Check calendars via iMessage
-- Create tasks and notes
-- Query APIs and databases
-- Run file operations
-- Send emails via other skills
-- Any other Claude Code capability
-
-Just make sure those skills are available in your Claude Code environment.
-
-### Conversation Persistence
-
-The conversation ID is automatically saved and reused across daemon restarts in:
-```
-~/tmp/imessage/imessage_claude_conversation_id.txt
-```
-
-This maintains full conversation history even if the daemon restarts.
-
 ## Security Considerations
 
 - The daemon has full access to your iMessage database
@@ -336,22 +294,6 @@ This maintains full conversation history even if the daemon restarts.
 - Logs may contain message content
 - Only run the daemon in trusted environments
 - Be mindful of which contact you monitor
-
-## Manual Installation (Advanced)
-
-If you need to modify the code or prefer not to use the plugin system:
-
-```bash
-# Clone the repository
-git clone https://github.com/dvdsgl/claude-imessage.git ~/Developer/claude-imessage
-
-# Run daemon directly
-cd ~/Developer/claude-imessage
-source ~/.claude-imessage.env
-./skills/imessage/daemon/imessage-auto-reply-daemon.sh
-```
-
-See [`skills/imessage/daemon/README.md`](skills/imessage/daemon/README.md) for detailed manual setup instructions.
 
 ## Contributing
 
