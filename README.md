@@ -1,7 +1,4 @@
-
-> ⚠️ **Use this plugin at your own risk.** This is created for personal use, and running Claude Code with permissions off as a bot on a Mac connected to iMessage and the Internet exposes your computer to considerable security risks. The author is not responsible for your use of this, and you are assuming all liability by using it.
-
----
+⚠️ **Use this plugin at your own risk.** This is created for personal use, and running Claude Code with permissions off as a bot on a Mac connected to iMessage and the Internet exposes your computer to considerable security risks. The author is not responsible for your use of this, and you are assuming all liability by using it.
 
 # Claude Code iMessage Assistant
 
