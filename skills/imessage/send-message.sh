@@ -1,19 +1,17 @@
 #!/bin/bash
 
-# Send a message to a contact
-# Usage: ./send-message.sh "Contact Name or Phone Number" "Message Text"
-# Or: echo "Message Text" | ./send-message.sh "Contact Name"
+# Send an iMessage to a contact
+# Usage: ./send-message.sh "Phone Number" "Message Text"
+# Or: echo "Message Text" | ./send-message.sh "Phone Number"
 
 if [ -z "$1" ]; then
-    echo "Usage: $0 \"Contact Name or Phone Number\" [\"Message Text\"]"
-    echo "Or pipe message: echo \"text\" | $0 \"Contact Name\""
+    echo "Usage: $0 \"Phone Number\" [\"Message Text\"]"
     exit 1
 fi
 
 CONTACT="$1"
 MESSAGE="${2:-}"
 
-# If no message provided as argument, read from stdin if available
 if [ -z "$MESSAGE" ] && [ ! -t 0 ]; then
     MESSAGE=$(cat)
 fi
@@ -23,34 +21,24 @@ if [ -z "$MESSAGE" ]; then
     exit 1
 fi
 
-# Escape quotes and backslashes for AppleScript
-# Also remove any stray backslashes before exclamation marks (from bash history expansion)
-CONTACT_ESCAPED=$(printf '%s' "$CONTACT" | sed 's/\\!/!/g' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
-MESSAGE_ESCAPED=$(printf '%s' "$MESSAGE" | sed 's/\\!/!/g' | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
+# Normalize phone number - add +1 prefix if needed
+PHONE="$CONTACT"
+if [[ ! "$PHONE" =~ ^\+ ]]; then
+    if [[ ${#PHONE} == 10 ]]; then
+        PHONE="+1${PHONE}"
+    elif [[ ${#PHONE} == 11 && "$PHONE" =~ ^1 ]]; then
+        PHONE="+${PHONE}"
+    fi
+fi
 
-osascript <<EOF
-tell application "Messages"
-    try
-        set targetService to 1st account whose service type = iMessage
-        set targetBuddy to participant "$CONTACT_ESCAPED" of targetService
-
-        send "$MESSAGE_ESCAPED" to targetBuddy
-
-        return "Message sent to: $CONTACT_ESCAPED"
-
-    on error errMsg
-        -- If iMessage fails, it might be an SMS contact
-        try
-            set targetService to 1st account whose service type = SMS
-            set targetBuddy to participant "$CONTACT_ESCAPED" of targetService
-
-            send "$MESSAGE_ESCAPED" to targetBuddy
-
-            return "SMS sent to: $CONTACT_ESCAPED"
-
-        on error errMsg2
-            return "Error: Could not send message. " & errMsg2
-        end try
-    end try
-end tell
-EOF
+osascript \
+    -e 'on run argv' \
+    -e '  set msg to item 1 of argv' \
+    -e '  set ph to item 2 of argv' \
+    -e '  tell application "Messages"' \
+    -e '    set targetService to 1st account whose service type = iMessage' \
+    -e '    set targetBuddy to participant ph of targetService' \
+    -e '    send msg to targetBuddy' \
+    -e '  end tell' \
+    -e 'end run' \
+    -- "$MESSAGE" "$PHONE"

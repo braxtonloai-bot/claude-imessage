@@ -78,7 +78,7 @@ fi | while IFS='|' read -r rowid text is_from_me date handle_id attributed_body_
         # - Remove leading single capital letter when followed by another letter
         # - Remove backslash escapes (e.g., "\!" -> "!", "\?" -> "?")
         # - Remove leading special chars
-        text=$(echo "$text" | sed -E 's/^[A-Z]([A-Z])/\1/' | sed 's/\\!/!/g' | sed 's/\\?/?/g' | sed 's/^[+*]//')
+        text=$(echo "$text" | LC_ALL=C sed -E 's/^[A-Z]([A-Z])/\1/' | LC_ALL=C sed 's/\\!/!/g' | LC_ALL=C sed 's/\\?/?/g' | LC_ALL=C sed 's/^[+*]//')
     fi
 
     if [ -z "$text" ]; then

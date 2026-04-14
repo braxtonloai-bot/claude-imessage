@@ -19,7 +19,7 @@ TMP_DIR="${IMESSAGE_TMP_DIR:-$PROJECT_ROOT/tmp}"
 PROCESSED_LOG="$TMP_DIR/processed_imessages.log"
 CONVERSATION_ID_FILE="$TMP_DIR/imessage_claude_conversation_id.txt"
 AGENT_PID_FILE="$TMP_DIR/imessage_agent.pid"
-IMESSAGE_SKILL="$PROJECT_ROOT/.claude/skills/imessage"
+IMESSAGE_SKILL="$PROJECT_ROOT"
 
 # Configuration from environment variables
 CONTACT_EMAIL="${IMESSAGE_CONTACT_EMAIL:-}"
@@ -249,6 +249,10 @@ process_messages() {
             # Check if already processed
             if check_if_processed "$message_id"; then
                 log "  Message already processed, skipping: ${text:0:30}..."
+            elif [ -z "$text" ]; then
+                # Skip blank/empty messages (tapbacks, reactions, attachments with no text)
+                mark_as_processed "$message_id"
+                log "  Skipping blank message (ROWID: $rowid)"
             else
                 # Mark as processed immediately (daemon won't process it again)
                 mark_as_processed "$message_id"

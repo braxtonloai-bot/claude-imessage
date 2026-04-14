@@ -29,7 +29,7 @@ if [ -n "$PHONE_NUMBER" ]; then
     QUERY="
     SELECT
         m.ROWID,
-        COALESCE(m.text, '') as text,
+        m.text,
         m.is_from_me,
         m.date,
         h.id as handle_id,
@@ -43,6 +43,8 @@ if [ -n "$PHONE_NUMBER" ]; then
     WHERE h.id LIKE '%$PHONE_NUMBER%'
         AND m.is_from_me = 0
         AND m.date > $APPLE_ONE_HOUR_AGO
+        AND m.text IS NOT NULL
+        AND m.text != ''
     ORDER BY m.date DESC
     LIMIT 10;
     "
@@ -51,13 +53,15 @@ else
     QUERY="
     SELECT
         ROWID,
-        COALESCE(text, '') as text,
+        text,
         is_from_me,
         date,
         '' as handle_id
     FROM message
     WHERE is_from_me = 0
         AND date > $APPLE_ONE_HOUR_AGO
+        AND text IS NOT NULL
+        AND text != ''
     ORDER BY date DESC
     LIMIT 10;
     "
